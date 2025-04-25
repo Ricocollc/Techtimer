@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hometown Hero Appliance Repair Timer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      color: #1b2a57;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+    label {
+      display: block;
+      margin: 1rem 0 0.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 200px;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #timerDisplay {
+      font-size: 2.5rem;
+      margin: 1.5rem 0;
+      color: #333;
+      transition: background-color 0.3s ease;
+    }
+    .flash {
+      animation: flashRed 1s infinite alternate;
+    }
+    @keyframes flashRed {
+      0% { background-color: transparent; color: red; }
+      100% { background-color: red; color: white; }
+    }
+    button {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      margin: 0.5rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background-color: #1b2a57;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #2743a6;
+    }
+    #actionButtons {
+      display: none;
+      margin-top: 2rem;
+    }
+    .red-btn {
+      background-color: #d32f2f;
+    }
+    .red-btn:hover {
+      background-color: #b71c1c;
+    }
+    .bottom-section {
+      margin-top: 3rem;
+    }
+    .email-btn {
+      background-color: #00695c;
+    }
+    .email-btn:hover {
+      background-color: #004d40;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Hometown Hero Appliance Repair Timer</h1>
+
+  <!-- Input Fields -->
+  <div>
+    <label for="jobNumber">Job Number:</label>
+    <input type="text" id="jobNumber" placeholder="Enter Job Number" />
+
+    <label for="techCode">Tech Code:</label>
+    <input type="text" id="techCode" maxlength="2" placeholder="2 Letter/Number Code" />
+  </div>
+
+  <!-- Timer Button -->
+  <button id="startBtn">Start Timer</button>
+  <div id="timerDisplay">00:00</div>
+
+  <div id="actionButtons">
+    <button class="red-btn" onclick="window.location.href='tel:4023990202'">📞 Call Office</button>
+    <button onclick="window.open('https://sites.google.com/nhaparts.com/help-center?pli=1', '_blank')">📚 Visit Help Center</button>
+  </div>
+
+  <div class="bottom-section">
+    <h3>Done or need help?</h3>
+    <button class="email-btn" onclick="submitReport()">📩 Submit Report</button>
+    <button class="red-btn" onclick="needHelp()">❓ Need Help?</button>
+  </div>
+
+  <script>
+    let timer;
+    let seconds = 0;
+    let beepInterval;
+
+    const startBtn = document.getElementById('startBtn');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const actionButtons = document.getElementById('actionButtons');
+
+    function updateTimer() {
+      seconds++;
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      if (seconds === 60) { // 1 minute for testing
+        showOptions();
+      }
+    }
+
+    function showOptions() {
+      actionButtons.style.display = 'block';
+      timerDisplay.classList.add('flash');
+      startAnnoyingBeep();
+      alert("Times up stupid, call Darrin or The Rat");
+    }
+
+    function startAnnoyingBeep() {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      beepInterval = setInterval(() => {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(1500, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.2); // short burst
+      }, 600); // beep every 0.6 seconds
+    }
+
+    startBtn.addEventListener('click', () => {
+      const jobNumber = document.getElementById('jobNumber').value.trim();
+      const techCode = document.getElementById('techCode').value.trim();
+
+      if (!jobNumber || !techCode) {
+        alert("Please enter both Job Number and Tech Code before starting the timer.");
+        return;
+      }
+
+      startBtn.disabled = true;
+      timer = setInterval(updateTimer, 1000);
+    });
+
+    function submitReport() {
+      clearInterval(beepInterval); // Stop annoying beep when submitting report
+      const jobNumber = document.getElementById('jobNumber').value || 'Not Entered';
+      const techCode = document.getElementById('techCode').value || 'NA';
+      const subject = encodeURIComponent(`Tech Report - Job #${jobNumber}`);
+      const body = encodeURIComponent(`Timer exceeded 1 minute in home.\n\nJob Number: ${jobNumber}\nTech Code: ${techCode}\nPlease review.`);
+      window.location.href = `mailto:darrin@nhaparts.com?subject=${subject}&body=${body}`;
+    }
+
+    function needHelp() {
+      clearInterval(beepInterval); // Stop annoying beep if they ask for help
+      window.location.href = "mailto:darrin@nhaparts.com?subject=please%20help%20me";
+    }
+  </script>
+</body>
+</html>
